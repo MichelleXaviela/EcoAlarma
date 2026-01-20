@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>EcoAlerta</title>
+  <style>
+    body { font-family: Arial; background:#e0f2f1; padding:20px; }
+    h1 { color:#2e7d32; }
+    label { display:block; margin-top:10px; }
+    input, textarea { width:100%; padding:6px; margin-top:4px; }
+    button { margin-top:10px; padding:8px; background:#4caf50; color:white; border:none; cursor:pointer; }
+    ul { margin-top:20px; background:#ffffff; padding:10px; }
+    li { margin-bottom:8px; }
+  </style>
+</head>
+<body>
+
+  <h1>EcoAlerta</h1>
+  <p>Reporte de problemas ambientales</p>
+
+  <label>Problema:</label>
+  <input id="problema" placeholder="Ej: Basura, contaminación">
+
+  <label>Descripción:</label>
+  <textarea id="descripcion"></textarea>
+
+  <button onclick="enviar()">Enviar reporte</button>
+
+  <h3>Reportes enviados</h3>
+  <ul id="lista"></ul>
+
+  <script>
+const URL = "https://script.google.com/macros/s/AKfycbzi9fDVXfoJD-Kpq__dO2i61Mc-1Ei-jh5HNVE_Gx21FkepAueiwdv_wbcDrHQVlEkc4Q/exec";
+
+function enviar() {
+  const nombre = document.getElementById("nombre").value;
+  const mensaje = document.getElementById("mensaje").value;
+
+  if (!nombre || !mensaje) {
+    alert("Completa todos los campos");
+    return;
+  }
+
+  fetch(URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ nombre, mensaje })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Reporte enviado");
+    document.getElementById("nombre").value = "";
+    document.getElementById("mensaje").value = "";
+    cargarMensajes();
+  })
+  .catch(err => alert("Error al enviar"));
+}
+
+function cargarMensajes() {
+  fetch(URL)
+    .then(r => r.json())
+    .then(data => {
+      const div = document.getElementById("reportes");
+      div.innerHTML = "";
+
+      data.reverse().forEach(r => {
+        div.innerHTML += `
+          <div>
+            <strong>${r.nombre}</strong><br>
+            ${r.mensaje}<br>
+            <small>${new Date(r.fecha).toLocaleString()}</small>
+            <hr>
+          </div>
+        `;
+      });
+    });
+}
+
+cargarMensajes();
+</script>
+</body>
+</html>
